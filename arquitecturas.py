@@ -37,3 +37,32 @@ class GNN_global(nn.Module):
         x = out.squeeze()
 
         return x
+
+class FCNN_global(nn.Module):
+
+    def __init__(self, dim, num_layers):
+        super(FCNN_global, self).__init__()
+
+        self.num_layers = num_layers
+        self.linears = torch.nn.ModuleList()
+        self.dim = dim
+        
+        for layer in range(num_layers):
+          self.linears.append(nn.Linear(dim[layer],dim[layer+1]))
+        self.relu = LeakyReLU()
+
+    def forward(self, x):
+
+        # Apply the GNN to the node features
+        num_layers = self.num_layers
+        linears = self.linears
+        relu = self.relu
+
+        out = x.reshape(-1,self.dim[0])
+
+        for layer in range(num_layers-1):
+          out = linears[layer](out)
+          out = relu(out)
+        
+        out = linears[num_layers-1](out)
+        return out
